@@ -135,6 +135,11 @@ impl FixedBitSet {
         for (subblock, value) in bitset.as_mut_slice().iter_mut().zip(blocks.into_iter()) {
             *subblock = value;
         }
+        // Clear the bits of the last block past the capacity.
+        let (last, rem) = div_rem(bits, BITS);
+        if rem != 0 {
+            bitset.as_mut_slice()[last] &= (1 << rem) - 1;
+        }
         bitset
     }
 

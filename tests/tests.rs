@@ -84,6 +84,24 @@ fn with_blocks_too_big_range_check() {
 
 #[test]
 #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
+fn with_blocks_too_big_truncated() {
+    let mut fb = FixedBitSet::with_capacity_and_blocks(4, vec![0b1111_0001]);
+
+    // since capacity is 4, the bits from 4 on should be dropped
+    assert_eq!(fb.ones().collect::<Vec<_>>(), vec![0]);
+    assert_eq!(fb.maximum(), Some(0));
+    assert_eq!(fb, FixedBitSet::with_capacity_and_blocks(4, vec![0b0001]));
+
+    // and stay clear when growing
+    fb.grow(8);
+    assert_eq!(fb.ones().collect::<Vec<_>>(), vec![0]);
+
+    let fb = FixedBitSet::with_capacity_and_blocks(BITS + 1, vec![0, !0]);
+    assert_eq!(fb.ones().collect::<Vec<_>>(), vec![BITS]);
+}
+
+#[test]
+#[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
 fn grow() {
     let mut fb = FixedBitSet::with_capacity(48);
     for i in 0..fb.len() {
